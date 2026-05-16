@@ -4,13 +4,13 @@
       "host": "imap.gmail.com",
       "port": 993,
       "user": "charmimalla0@gmail.com",
-      "password": "Charmi@2005",
+      "password": "llbiljvphefhdngf"
     },
     "smtp": {
       "host": "smtp.gmail.com",
       "port": 465,
       "user": "charmimalla0@gmail.com",
-      "password": "Charmi@2005"
+      "password": "llbiljvphefhdngf"
     }
   }
 }
