@@ -1,0 +1,176 @@
+{
+  "name": "AI Email Auto-Responder",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "a3e67a6f-5f16-429d-92a6-7f5b8634662b",
+      "name": "Email Read (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        80
+      ],
+      "credentials": {
+        "imap": {
+          "id": "yoDk9CrVjV7v0NW4",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"model\": \"phi3:mini\",\n  \"stream\": false,\n  \"prompt\": \"You are a professional and helpful email assistant. Your task is to write a concise, relevant, and polite reply to the following email.\\n\\nSender: {{ $json.from.address }}\\nSubject: {{ $json.subject }}\\nEmail Body:\\n{{ $json.text }}\\n\\nIMPORTANT INSTRUCTIONS:\\n- Write ONLY the body of the reply.\\n- Do NOT include any greeting (like 'Dear...' or 'Hi...').\\n- Do NOT include any signature or closing (like 'Best regards' or 'Sincerely').\\n- Be concise, professional, and directly address the content of the email.\\n- If the email is a simple greeting, respond warmly but briefly.\\n- Reply in the same language as the original email.\\n\\nReply body:\"\n}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "70d89c6e-1838-4d94-b453-bd2f41bb5faf",
+      "name": "Call Ollama LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-original-from",
+              "name": "originalFrom",
+              "value": "={{ $('Email Read (IMAP)').item.json.from.address }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-original-subject",
+              "name": "originalSubject",
+              "value": "={{ $('Email Read (IMAP)').item.json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-original-message-id",
+              "name": "originalMessageId",
+              "value": "={{ $('Email Read (IMAP)').item.json.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-ai-response",
+              "name": "aiResponse",
+              "value": "={{ $json.response }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d7e0febf-c739-43a7-b97e-2f38cd11f461",
+      "name": "Parse & Prepare Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "=charmimalla2005@gmail.com",
+        "toEmail": "=charmimalla0@gmail.com",
+        "subject": "=Re: AI Auto-Reply: {{ $json.originalSubject }}",
+        "html": "={{$json.aiResponse}}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "4e8e7247-23f4-4218-ab57-3e52e172e6a8",
+      "name": "Send Reply Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        0
+      ],
+      "webhookId": "293d87bc-47e1-4218-8c32-5ea7bb598448",
+      "credentials": {
+        "smtp": {
+          "id": "VFutD4Sza554O2Tq",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Read (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Call Ollama LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Ollama LLM": {
+      "main": [
+        [
+          {
+            "node": "Parse & Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Prepare Response": {
+      "main": [
+        [
+          {
+            "node": "Send Reply Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a956007d-76da-4e1e-b1ea-0ec965a2501d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "89e47324507e666309af3f88fb493be8443d39e88492fb6784d8e9d66dffa02d"
+  },
+  "id": "8abngB4EJg1I4F16",
+  "tags": [
+    {
+      "updatedAt": "2026-05-16T05:39:02.128Z",
+      "createdAt": "2026-05-16T05:39:02.128Z",
+      "id": "gfCAKrA0NHpW46qq",
+      "name": "AI Email"
+    }
+  ]
+}
